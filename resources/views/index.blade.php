@@ -60,9 +60,9 @@
 
             .box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }
         </style>
-
         
     </head>
+    
     <body>
         <header>
             <div class="collapse bg-dark" id="navbarHeader">

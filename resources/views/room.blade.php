@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+        <title>Video Chat Application</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
@@ -63,6 +63,8 @@
             }
 
             .box-shadow { box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05); }
+            
+            
         </style>
 
 
@@ -119,16 +121,18 @@
                 margin-bottom: 30px;
             }
         </style> -->
+        <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+        
         <script src="//media.twiliocdn.com/sdk/js/video/v1/twilio-video.min.js"></script>
         <script>
             Twilio.Video.createLocalTracks({
                audio: true,
-               video: { width: 300 }
+               video: { width: 348 }
             }).then(function(localTracks) {
                return Twilio.Video.connect('{{ $accessToken }}', {
                    name: '{{ $roomName }}',
                    tracks: localTracks,
-                   video: { width: 300 }
+                   video: { width: 348 }
                });
             }).then(function(room) {
                console.log('Successfully joined a Room: ', room.name);
@@ -143,7 +147,29 @@
                room.on('participantConnected', function(participant) {
                    console.log("Joining: '" +  participant.identity +  "'");
                    participantConnected(participant);
+                   
                });
+               
+               
+                $('#muteable').click(function() {
+                    if ($(this).attr('data-status') == "true") {
+                        room.localParticipant.audioTracks.forEach(audioTrack => {
+                               audioTrack.disable();
+                            });
+                      $(this).attr("data-status", "false");
+                      $("#muteable").html("<i class='fa fa-microphone-slash' aria-hidden='true'></i> Unmute Audio");
+                    } 
+                    else {
+                        room.localParticipant.audioTracks.forEach(audioTrack => {
+                               audioTrack.enable();
+                            });
+                      $(this).attr("data-status", "true");
+                      $("#muteable").html("<i class='fa fa-microphone' aria-hidden='true'></i> Mute Audio");
+                    }
+                });
+                
+                
+                videoDisable(room);
 
                room.on('participantDisconnected', function(participant) {
                    console.log("Disconnected: '" +  participant.identity  + "'");
@@ -151,13 +177,37 @@
                });
             });
             // additional functions will be added after this point //edited
+            
+            function videoDisable(room) {
+                $('#mutevideo').click(function() {
+                    if ($(this).attr('data-video') == "true") {
+                        room.localParticipant.videoTracks.forEach(videoTrack => {
+                               videoTrack.disable();
+                               
+                               //trackRemoved(videoTrack);
+                            });
+                      $(this).attr("data-video", "false");
+                      $("#mutevideo").html("<span class='iconify' data-icon='fa-solid:video-slash' data-inline='false'></span> Enable Video");
+                    } 
+                    else {
+                        room.localParticipant.videoTracks.forEach(videoTrack => {
+                                videoTrack.enable();
+                                
+                            });
+                      $(this).attr("data-video", "true");
+                      $("#mutevideo").html("<i class='fa fa-video-camera' aria-hidden='true'></i> Disable Video");
+                    }
+                });
+            }
+            
+            
             function participantConnected(participant) {
                console.log('Participant "%s" connected', participant.identity);
 
-                const div = document.createElement('div');
-                div.id = participant.sid;
-                div.setAttribute("style", "float: left; margin: 10px;");
-                div.innerHTML = "<div style='clear:both'>" + participant.identity + "</div>";
+               const div = document.createElement('div');
+               div.id = participant.sid;
+               div.setAttribute("style", "float: left; margin: 10px;");
+               div.innerHTML = "<div style='clear:both; text-align:center;'>" + participant.identity + "</div>";
 
                participant.tracks.forEach(function(track) {
                    trackAdded(div, track)
@@ -166,10 +216,13 @@
                participant.on('trackAdded', function(track) {
                    trackAdded(div, track)
                });
+               
                participant.on('trackRemoved', trackRemoved);
 
                document.getElementById('media-div').appendChild(div);
             }
+            
+            
 
             function participantDisconnected(participant) {
                console.log('Participant "%s" disconnected', participant.identity);
@@ -182,7 +235,7 @@
                div.appendChild(track.attach());
                var video = div.getElementsByTagName("video")[0];
                if (video) {
-                   video.setAttribute("style", "max-width:300px;");
+                   video.setAttribute("style", "max-width:340px; max-height:220px!important");
                }
             }
 
@@ -214,105 +267,50 @@
             </div>
         </div> -->
 
-        <header>
-            <div class="collapse bg-dark" id="navbarHeader">
-            <div class="container">
-              <div class="row">
-                <div class="col-sm-8 col-md-7 py-4">
-                  <h4 class="text-white">About</h4>
-                  <p class="text-muted" style="color: #ccc!important;">Add some information about the album below, the author, or any other background context. Make it a few sentences long so folks can pick up some informative tidbits. Then, link them off to some social networking sites or contact information.</p>
-                  @if(Auth::check())
-                    <a href="{{ url('/logout') }}" class="btn btn-outline-secondary"><i class="fa fa-sign-out"></i> Logout</a>
-                  @endif
-                </div>
-                <div class="col-sm-4 offset-md-1 py-4">
-                  <h4 class="text-white">Contact</h4>
-                  <ul class="list-unstyled">
-                    <li><a href="https://github.com/snigdho991" class="text-white">Github</a></li>
-                    <li><a href="https://www.facebook.com/snigdho.majumder" class="text-white">Facebook</a></li>
-                    <li><a href="mailto:Snigdho2011@gmail.com" class="text-white">Email me</a></li>
-                  </ul>
-
-                </div>
-              </div>
-            </div>
-            </div>
-            
-            <div class="navbar navbar-dark bg-dark box-shadow">
-            <div class="container d-flex justify-content-between">
-              <a href="#" class="navbar-brand d-flex align-items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                <strong>Video Conference</strong>
-              </a>
-
-              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-            
-            </div>
-            </div>
-
-        </header>
+        @include('includes.header')
         
 
         <main role="main">
-            <section class="jumbotron text-center">
-                <div class="container">
-                      <h1>Room Participants</h1>
-                      <p class="lead text-muted">
-                        Hello, <b>{{ Auth::user()->name }} </b>. Welcome to the room - <h5>{{ $roomName }}</h5>
-                      </p>
-                      <p>
-                        You can copy the invitation link from below and send it to your friends to connect with you in this room.
-                      </p>
-                      <p>
 
+            <div class="album py-5 bg-light" style="background-color: #fff!important">
+                <div class="container">
+                    <p class="lead text-muted text-center">Welcome to the room - <b>{{ $roomName }}</b></p>
+                    <div class="row">
+                        <div id="media-div"></div>
+                        
+                    </div>
+                    <div class="row">
+                    <!--<button id="muteable" data-status="true" class="btn btn-xs btn-success" style="position: relative;top: -35px;margin-left: 5px;"><i class="fa fa-microphone" aria-hidden="true"></i></button>-->
+                    
+                    <button id="muteable" data-status="true" class="btn btn-xs btn-success" style="position: relative;top: 49px;width: 570px;"><i class="fa fa-microphone" aria-hidden="true"></i> Mute Audio</button>
+                    
+                    <button id="mutevideo" data-video="true" class="btn btn-xs btn-info" style="position: relative;top: 49px;width: 570px;"><i class="fa fa-video-camera" aria-hidden="true"></i> Disable Video</button>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <section class="jumbotron text-center" style="background-color: #f8f9fa!important">
+                <div class="container">
+                      <p class="lead text-muted">
+                        Hello, <b>{{ Auth::user()->name }} </b>. You can copy the invitation link from below and send it to your friends to connect with you in this room.
+                      </p>
+                      
+                      <p>
                           <div class="input-group mb-3">
-                            <input type="text" class="form-control" value="{{ 'https://video-conference.test/room/join/'.$roomName }}" aria-describedby="button-addon2">
+                            <input type="text" class="form-control" value="{{ 'https://video-conference.roaringbangladesh.com/room/join/'.$roomName }}" aria-describedby="button-addon2">
                             <div class="input-group-append">
                               <button class="btn btn-outline-secondary" type="button" id="button-addon2">Copy</button>
                             </div>
                           </div>
                       </p>
 
-                  </div>                
+                 </div>                
             </section>
-
-            <div class="album py-5 bg-light">
-                <div class="container">
-                    <div class="row">
-                        <!-- <div class="col-md-4">
-                          <div class="card mb-4 box-shadow"> -->
-
-                            <div id="media-div"></div>
-
-                            <!-- <img class="card-img-top" src="https://phillipbrande.files.wordpress.com/2013/10/random-pic-14.jpg" alt="Card image cap"> --> <!-- 348(w), 218(h) div.setAttribute("style", "float: left; margin: 10px;"); -->
-                            <!-- <div class="card-body">
-                              <p class="card-text text-center">Snigdho Majumder</p>
-                              <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                                  <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                                </div>
-                                
-                              </div>
-                            </div> -->
-                          <!-- </div>
-                                                  </div> -->
-                    </div>
-                </div>
-            </div>
 
         </main>
 
-        <footer class="text-muted" style="background: #F1F1F1;">
-            <div class="container">
-            <p class="float-right">
-              <a href="#">Back to top</a>
-            </p>
-            <p>&copy; Copyrights 2020. Developed by <a href="https://www.facebook.com/snigdho.majumder">Snigdho</a></p>
-            </div>
-        </footer>
+        @include('includes.footer')
 
         <script
           src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
